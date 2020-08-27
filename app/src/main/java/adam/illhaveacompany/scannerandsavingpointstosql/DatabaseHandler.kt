@@ -33,7 +33,7 @@ class DatabaseHandler (context: Context) :
         onCreate(db)
     }//11
 
-    fun addPoints(points: Points) : Long {
+    fun addFirstPoints(points: Points) : Long {
         val db = this.writableDatabase
 
         val contentValues = ContentValues()
@@ -108,4 +108,22 @@ class DatabaseHandler (context: Context) :
         return pointsList
 
     }//18
+
+    fun addSecondaryPoints (pointsToAdd : Int) : Long {
+        val pointsValueList = getPointsValues()
+        val lastPointsValueRow = pointsValueList[pointsValueList.size - 1]
+        val lastPointsValue = lastPointsValueRow.numberOfPoints
+        val newPointsValue = lastPointsValue + pointsToAdd
+
+        val db = this.writableDatabase
+
+        val contentValues = ContentValues()
+
+        contentValues.put(KEY_NUMBER_OF_POINTS, newPointsValue)
+
+        val success = db.insert(TABLE_POINTS, null, contentValues)
+        db.close()
+
+        return success
+    }//22
 }

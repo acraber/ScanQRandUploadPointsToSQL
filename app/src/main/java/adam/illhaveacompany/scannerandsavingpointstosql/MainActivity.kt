@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
 
         scanBtn.setOnClickListener{
             scanCode()
-        }//6
+        }//6//
 
         if(areTherePointsInTheDatabase()){
             pointsNumberTextView.text = getPointsValueFromDb().toString()
@@ -39,12 +39,11 @@ class MainActivity : AppCompatActivity() {
             if (result.contents != null) {
                 if(result.contents == "TESTCODE") {
                     if(! areTherePointsInTheDatabase()) {
-                        addFirstPointsToSQL(80)
+                        addFirstPointsToSQL(80)//
                         pointsNumberTextView.text = getPointsValueFromDb().toString()
                     }else{
-                        addFirstPointsToSQL(100)
+                        addSecondaryPointsToDb(100)//24
                         pointsNumberTextView.text = getPointsValueFromDb().toString()
-                        Toast.makeText(this@MainActivity, "There is already data in the database", Toast.LENGTH_SHORT).show()
                     }//21
 
                     if(isThereMoreThanOneSetOfPoints()){
@@ -65,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addFirstPointsToSQL(points: Int) {
         val databaseHandler = DatabaseHandler(this)
-        val status = databaseHandler.addPoints(Points(0, points))
+        val status = databaseHandler.addFirstPoints(Points(0, points))
 
         if(status > -1) {
             Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG).show()
@@ -92,10 +91,21 @@ class MainActivity : AppCompatActivity() {
     }//18
 
     private fun areTherePointsInTheDatabase() : Boolean {
-        val dbhandler = DatabaseHandler(this)
-        val areTherePoints = dbhandler.areTherePoints()
-        dbhandler.close()
+        val dbHandler = DatabaseHandler(this)
+        val areTherePoints = dbHandler.areTherePoints()
+        dbHandler.close()
         return areTherePoints
     }//19
+
+    private fun addSecondaryPointsToDb(points: Int) {
+        val databaseHandler = DatabaseHandler(this)
+        val status = databaseHandler.addSecondaryPoints(points)
+
+        if(status > -1) {
+            Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG).show()
+        }else{
+            Toast.makeText(applicationContext,"Record save failed", Toast.LENGTH_LONG).show()
+        }
+    }//23
 
 }
