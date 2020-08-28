@@ -1,22 +1,30 @@
 package adam.illhaveacompany.scannerandsavingpointstosql
 //I want to log the barcode that comes up
+import android.app.Dialog
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.ContactsContract
+import android.widget.Button
+import android.widget.NumberPicker
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.activity_main.*
+import javax.xml.datatype.DatatypeConstants.SECONDS
+
 
 class MainActivity : AppCompatActivity() {
+
+    var pointsToAdd : Int = 0
+    var doneWithShowingSpinner = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         scanBtn.setOnClickListener{
-            scanCode()
-        }//6//
+            doneWithShowingSpinner = false
+            show()
+        }//27
 
         if(areTherePointsInTheDatabase()){
             pointsNumberTextView.text = getPointsValueFromDb().toString()
@@ -39,11 +47,13 @@ class MainActivity : AppCompatActivity() {
             if (result.contents != null) {
                 if(result.contents == "TESTCODE") {
                     if(! areTherePointsInTheDatabase()) {
-                        addFirstPointsToSQL(80)//
+                        addFirstPointsToSQL(pointsToAdd)//27
                         pointsNumberTextView.text = getPointsValueFromDb().toString()
+                        pointsToAdd = 0
                     }else{
-                        addSecondaryPointsToDb(100)//24
+                        addSecondaryPointsToDb(pointsToAdd)//24
                         pointsNumberTextView.text = getPointsValueFromDb().toString()
+                        pointsToAdd = 0
                     }//21
 
                     if(isThereMoreThanOneSetOfPoints()){
@@ -69,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         if(status > -1) {
             Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG).show()
         }else{
-            Toast.makeText(applicationContext,"Record save failed", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "Record save failed", Toast.LENGTH_LONG).show()
         }
     }//13
 
@@ -104,8 +114,32 @@ class MainActivity : AppCompatActivity() {
         if(status > -1) {
             Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG).show()
         }else{
-            Toast.makeText(applicationContext,"Record save failed", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "Record save failed", Toast.LENGTH_LONG).show()
         }
     }//23
+
+    private fun show() {
+        val d = Dialog(this)
+        d.setTitle("NumberPicker")
+        d.setContentView(R.layout.dialog)
+        val b1: Button = d.findViewById(R.id.setButton) as Button
+        val b2: Button = d.findViewById(R.id.cancelButton) as Button
+        val np = d.findViewById(R.id.numberPicker1) as NumberPicker
+        np.maxValue = 20
+        np.minValue = 0
+        np.wrapSelectorWheel = false
+
+        b1.setOnClickListener{
+            pointsToAdd = np.value
+            d.dismiss()
+            doneWithShowingSpinner = true
+            Toast.makeText(this, "The number of points is $pointsToAdd", Toast.LENGTH_SHORT).show()
+            scanCode()//6 but up top
+        }
+        b2.setOnClickListener {
+            d.dismiss()
+        }
+        d.show()
+    }//26
 
 }
