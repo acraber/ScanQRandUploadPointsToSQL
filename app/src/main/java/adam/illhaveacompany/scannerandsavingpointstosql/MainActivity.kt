@@ -28,44 +28,11 @@ class MainActivity : AppCompatActivity() {
             show()
         }//27
 
-        if(areTherePointsInTheDatabase()){
-            setProgressBarAndPointsNumber(getPointsValueFromDb())
-        }else{
-            setProgressBarAndPointsNumber(0)
-        }//29
+
+        setProgressBarAndPointsNumber(getPointsValueFromDb())
 
         redeemPointsBtn.setOnClickListener {
-            if(areTherePointsInTheDatabase()){
-                if(getPointsValueFromDb() >= 50){
-                    val builder2 = AlertDialog.Builder(this)
-                    builder2.setTitle("Redeeming Points")
-                    builder2.setMessage("Are you sure you would like to redeem your points?\n\nThis can only be done once\n\nIf you do this " +
-                            "away from a Los Amigos employee the points become voided")
-                    builder2.setPositiveButton("YES") { dialogInterface: DialogInterface, i: Int ->
-                        val builder4 = AlertDialog.Builder(this)
-                        builder4.setTitle("SHOW TO EMPLOYEE")
-                        builder4.setMessage("The user has chosen to redeem their points\n\nShow this message to Los Amigos employee or points may be voided")
-                        builder4.setPositiveButton("Okay") { dialogInterface: DialogInterface, i: Int ->
-                            Toast.makeText(this, "Now Remove Points", Toast.LENGTH_SHORT).show()
-                        }
-                        
-                        builder4.show()
-                    }
-                    builder2.setNegativeButton("NO") { dialogInterface: DialogInterface, i: Int ->
-                        val builder3 = AlertDialog.Builder(this)
-                        builder3.setTitle("NOT REDEEMING POINTS")
-                        builder3.setMessage("User cancelled points redemption")
-                        builder3.setPositiveButton("Okay") { dialogInterface: DialogInterface, i: Int ->
-                        }
-                        builder3.show()
-                    }
-                    builder2.show()
-                }else{
-                    Toast.makeText(this, "There are not enough points to redeem", Toast.LENGTH_SHORT).show()
-                }
-            }else{
-                Toast.makeText(this, "There are not enough points to redeem", Toast.LENGTH_SHORT).show()
-            }
+            redeemPoints()
         }
 
     }
@@ -115,11 +82,15 @@ class MainActivity : AppCompatActivity() {
     }//17
 
     private fun getPointsValueFromDb() : Int {
+        var lastPointsValue = 0
+        if(areTherePointsInTheDatabase()){
         val databaseHandler = DatabaseHandler(this)
         val pointsValueList = databaseHandler.getPointsValues()
         val lastPointsValueRow = pointsValueList[pointsValueList.size - 1]
-        val lastPointsValue = lastPointsValueRow.numberOfPoints
-
+        lastPointsValue = lastPointsValueRow.numberOfPoints
+        }else{
+            lastPointsValue = 0
+        }
         return lastPointsValue
     }//18
 
@@ -180,22 +151,18 @@ class MainActivity : AppCompatActivity() {
         builder.setNegativeButton("GO BACK") { dialogInterface: DialogInterface, i: Int ->
             Toast.makeText(this, "Scan cancelled", Toast.LENGTH_SHORT).show()
         }
-        if(areTherePointsInTheDatabase()){
-            var totalPointsAfterAdding = pointsToAdd + getPointsValueFromDb()
-            if(totalPointsAfterAdding >= 50){
-                builder.setMessage("A Los Amigos employee must verify points before scanning.\n\nThe maximum total points allowed is 50")
-                totalPointsAfterAdding = 0
-                builder.show()
-            }else{
-                builder.setMessage("A Los Amigos employee must verify points before scanning.")
-                totalPointsAfterAdding = 0
-                builder.show()
-            }
+
+        totalPointsAfterAdding = pointsToAdd + getPointsValueFromDb()
+        if(totalPointsAfterAdding >= 50){
+            builder.setMessage("A Los Amigos employee must verify points before scanning.\n\nThe maximum total points allowed is 50")
+            totalPointsAfterAdding = 0
+            builder.show()
         }else{
             builder.setMessage("A Los Amigos employee must verify points before scanning.")
             totalPointsAfterAdding = 0
             builder.show()
-        }
+            }
+
     }//31 and also //6 earlier
 
     b2.setOnClickListener {
@@ -215,6 +182,37 @@ class MainActivity : AppCompatActivity() {
             pointsNumberTextView.text = numberOfPoints.toString()
             ObjectAnimator.ofInt(progressBar, "progress", numberOfPoints*10).setDuration(2000).start()
         }
+    }
+
+    private fun redeemPoints(){
+        if(getPointsValueFromDb() >= 50){
+            val builder2 = AlertDialog.Builder(this)
+            builder2.setTitle("Redeeming Points")
+            builder2.setMessage("Are you sure you would like to redeem your points?\n\nThis can only be done once\n\nIf you do this " +
+                    "away from a Los Amigos employee the points become voided")
+            builder2.setPositiveButton("YES") { dialogInterface: DialogInterface, i: Int ->
+                val builder4 = AlertDialog.Builder(this)
+                builder4.setTitle("SHOW TO EMPLOYEE")
+                builder4.setMessage("The user has chosen to redeem their points\n\nShow this message to Los Amigos employee or points may be voided")
+                builder4.setPositiveButton("Okay") { dialogInterface: DialogInterface, i: Int ->
+                    Toast.makeText(this, "Now Remove Points", Toast.LENGTH_SHORT).show()
+                }
+
+                builder4.show()
+            }
+            builder2.setNegativeButton("NO") { dialogInterface: DialogInterface, i: Int ->
+                val builder3 = AlertDialog.Builder(this)
+                builder3.setTitle("NOT REDEEMING POINTS")
+                builder3.setMessage("User cancelled points redemption")
+                builder3.setPositiveButton("Okay") { dialogInterface: DialogInterface, i: Int ->
+                }
+                builder3.show()
+            }
+               builder2.show()
+        }else{
+            Toast.makeText(this, "There are not enough points to redeem", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
 }
