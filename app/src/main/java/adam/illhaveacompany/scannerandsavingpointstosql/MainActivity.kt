@@ -34,6 +34,18 @@ class MainActivity : AppCompatActivity() {
             setProgressBarAndPointsNumber(0)
         }//29
 
+        redeemPointsBtn.setOnClickListener {
+            if(areTherePointsInTheDatabase()){
+                if(getPointsValueFromDb() >= 50){
+                    Toast.makeText(this, "There are enough points to redeem", Toast.LENGTH_SHORT).show()
+                }else{
+                    Toast.makeText(this, "There are not enough points to redeem", Toast.LENGTH_SHORT).show()
+                }
+            }else{
+                Toast.makeText(this, "There are not enough points to redeem", Toast.LENGTH_SHORT).show()
+            }
+        }
+
     }
 
     private fun scanCode() {
@@ -57,9 +69,6 @@ class MainActivity : AppCompatActivity() {
                     }else{
                         addSecondaryPointsToDb(pointsToAdd)//24
                         setProgressBarAndPointsNumber(getPointsValueFromDb())
-                        if (getPointsValueFromDb() == 50){
-                            Toast.makeText(this, "The maximum allowed number of points is 50", Toast.LENGTH_SHORT).show()
-                        }
                         pointsToAdd = 0
                     }//21
 
@@ -144,15 +153,30 @@ class MainActivity : AppCompatActivity() {
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Adding ${pointsToAdd} points")
-        builder.setMessage("A Los Amigos employee must verify points before scanning.\n\nThe maximum total points allowed is 50")
         builder.setPositiveButton("SCAN") { dialogInterface: DialogInterface, i: Int ->
             scanCode()
         }
         builder.setNegativeButton("GO BACK") { dialogInterface: DialogInterface, i: Int ->
             Toast.makeText(this, "Scan cancelled", Toast.LENGTH_SHORT).show()
         }
-        builder.show()
+        if(areTherePointsInTheDatabase()){
+            var totalPointsAfterAdding = pointsToAdd + getPointsValueFromDb()
+            if(totalPointsAfterAdding >= 50){
+                builder.setMessage("A Los Amigos employee must verify points before scanning.\n\nThe maximum total points allowed is 50")
+                totalPointsAfterAdding = 0
+                builder.show()
+            }else{
+                builder.setMessage("A Los Amigos employee must verify points before scanning.")
+                totalPointsAfterAdding = 0
+                builder.show()
+            }
+        }else{
+            builder.setMessage("A Los Amigos employee must verify points before scanning.")
+            totalPointsAfterAdding = 0
+            builder.show()
+        }
     }//31 and also //6 earlier
+
     b2.setOnClickListener {
         d.dismiss()
     }
