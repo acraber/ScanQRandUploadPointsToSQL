@@ -2,15 +2,16 @@ package adam.illhaveacompany.scannerandsavingpointstosql
 //I want to log the barcode that comes up
 import android.animation.ObjectAnimator
 import android.app.Dialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.NumberPicker
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.activity_main.*
-import javax.xml.datatype.DatatypeConstants.SECONDS
 
 
 class MainActivity : AppCompatActivity() {
@@ -130,18 +131,28 @@ class MainActivity : AppCompatActivity() {
     d.setContentView(R.layout.dialog)
     val b1: Button = d.findViewById(R.id.setButton) as Button
     val b2: Button = d.findViewById(R.id.cancelButton) as Button
-    val np = d.findViewById(R.id.numberPicker1) as NumberPicker
-    np.maxValue = 20
-    np.minValue = 1
-    np.wrapSelectorWheel = false
+    val numberPicker = d.findViewById(R.id.numberPicker1) as NumberPicker
+    numberPicker.maxValue = 20
+    numberPicker.minValue = 1
+    numberPicker.wrapSelectorWheel = false
 
     b1.setOnClickListener{
-        pointsToAdd = np.value
+        var totalPointsAfterAdding = 0
+        pointsToAdd = numberPicker.value
         d.dismiss()
         doneWithShowingSpinner = true
-        Toast.makeText(this, "Scan the Los Amigos barcode to add points", Toast.LENGTH_SHORT).show()
-        scanCode()//6 but up top
-    }
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Adding ${pointsToAdd} points")
+        builder.setMessage("A Los Amigos employee must verify points before scanning.\n\nThe maximum total points allowed is 50")
+        builder.setPositiveButton("SCAN") { dialogInterface: DialogInterface, i: Int ->
+            scanCode()
+        }
+        builder.setNegativeButton("GO BACK") { dialogInterface: DialogInterface, i: Int ->
+            Toast.makeText(this, "Scan cancelled", Toast.LENGTH_SHORT).show()
+        }
+        builder.show()
+    }//31 and also //6 earlier
     b2.setOnClickListener {
         d.dismiss()
     }
