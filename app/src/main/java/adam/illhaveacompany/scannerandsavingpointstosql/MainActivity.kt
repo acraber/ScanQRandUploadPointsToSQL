@@ -37,7 +37,29 @@ class MainActivity : AppCompatActivity() {
         redeemPointsBtn.setOnClickListener {
             if(areTherePointsInTheDatabase()){
                 if(getPointsValueFromDb() >= 50){
-                    Toast.makeText(this, "There are enough points to redeem", Toast.LENGTH_SHORT).show()
+                    val builder2 = AlertDialog.Builder(this)
+                    builder2.setTitle("Redeeming Points")
+                    builder2.setMessage("Are you sure you would like to redeem your points?\n\nThis can only be done once\n\nIf you do this " +
+                            "away from a Los Amigos employee the points become voided")
+                    builder2.setPositiveButton("YES") { dialogInterface: DialogInterface, i: Int ->
+                        val builder4 = AlertDialog.Builder(this)
+                        builder4.setTitle("SHOW TO EMPLOYEE")
+                        builder4.setMessage("The user has chosen to redeem their points\n\nShow this message to Los Amigos employee or points may be voided")
+                        builder4.setPositiveButton("Okay") { dialogInterface: DialogInterface, i: Int ->
+                            Toast.makeText(this, "Now Remove Points", Toast.LENGTH_SHORT).show()
+                        }
+                        
+                        builder4.show()
+                    }
+                    builder2.setNegativeButton("NO") { dialogInterface: DialogInterface, i: Int ->
+                        val builder3 = AlertDialog.Builder(this)
+                        builder3.setTitle("NOT REDEEMING POINTS")
+                        builder3.setMessage("User cancelled points redemption")
+                        builder3.setPositiveButton("Okay") { dialogInterface: DialogInterface, i: Int ->
+                        }
+                        builder3.show()
+                    }
+                    builder2.show()
                 }else{
                     Toast.makeText(this, "There are not enough points to redeem", Toast.LENGTH_SHORT).show()
                 }
@@ -62,15 +84,10 @@ class MainActivity : AppCompatActivity() {
         if (result != null) {
             if (result.contents != null) {
                 if(result.contents == "TESTCODE") {
-                    if(! areTherePointsInTheDatabase()) {
-                        addFirstPointsToSQL(pointsToAdd)//27
-                        setProgressBarAndPointsNumber(getPointsValueFromDb())
-                        pointsToAdd = 0
-                    }else{
-                        addSecondaryPointsToDb(pointsToAdd)//24
-                        setProgressBarAndPointsNumber(getPointsValueFromDb())
-                        pointsToAdd = 0
-                    }//21
+
+                    addPointsToDb(pointsToAdd)//24
+                    setProgressBarAndPointsNumber(getPointsValueFromDb())
+                    pointsToAdd = 0
 
                     if(isThereMoreThanOneSetOfPoints()){
                         val databaseHandler = DatabaseHandler(this)
@@ -88,16 +105,6 @@ class MainActivity : AppCompatActivity() {
         }
     } //7
 
-    private fun addFirstPointsToSQL(points: Int) {
-        val databaseHandler = DatabaseHandler(this)
-        val status = databaseHandler.addFirstPoints(Points(0, points))
-
-        if(status > -1) {
-            Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG).show()
-        }else{
-            Toast.makeText(applicationContext, "Record save failed", Toast.LENGTH_LONG).show()
-        }
-    }//13
 
     private fun isThereMoreThanOneSetOfPoints(): Boolean {
         //returns whether there's two sets of points - found from DatabaseHandler's function
@@ -123,14 +130,28 @@ class MainActivity : AppCompatActivity() {
         return areTherePoints
     }//19
 
-    private fun addSecondaryPointsToDb(points: Int) {
-        val databaseHandler = DatabaseHandler(this)
-        val status = databaseHandler.addSecondaryPoints(points)
+    private fun addPointsToDb(points: Int) {
+        if(areTherePointsInTheDatabase()) {
+            val databaseHandler = DatabaseHandler(this)
+            val status = databaseHandler.addSecondaryPoints(points)
 
-        if(status > -1) {
-            Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG).show()
+            if (status > -1) {
+                Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                Toast.makeText(applicationContext, "Record save failed", Toast.LENGTH_LONG).show()
+            }
+            databaseHandler.close()
         }else{
-            Toast.makeText(applicationContext, "Record save failed", Toast.LENGTH_LONG).show()
+            val databaseHandler = DatabaseHandler(this)
+            val status = databaseHandler.addFirstPoints(Points(0, points))
+
+            if(status > -1) {
+                Toast.makeText(applicationContext, "Points Successfully Added", Toast.LENGTH_LONG).show()
+            }else{
+                Toast.makeText(applicationContext, "Record save failed", Toast.LENGTH_LONG).show()
+            }
+            databaseHandler.close()
         }
     }//23
 
