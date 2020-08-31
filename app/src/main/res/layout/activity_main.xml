@@ -21,7 +21,15 @@
         android:layout_height="wrap_content"
         android:text="NO POINTS"
         android:textSize="55dp"
+        android:paddingBottom="50dp"
         />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:scaleY="4"/>
 
 </LinearLayout>
 

@@ -1,5 +1,6 @@
 package adam.illhaveacompany.scannerandsavingpointstosql
 //I want to log the barcode that comes up
+import android.animation.ObjectAnimator
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
@@ -27,8 +28,10 @@ class MainActivity : AppCompatActivity() {
         }//27
 
         if(areTherePointsInTheDatabase()){
-            pointsNumberTextView.text = getPointsValueFromDb().toString()
-        } //20
+            setProgressBarAndPointsNumber(getPointsValueFromDb())
+        }else{
+            setProgressBarAndPointsNumber(0)
+        }//29
 
     }
 
@@ -48,11 +51,14 @@ class MainActivity : AppCompatActivity() {
                 if(result.contents == "TESTCODE") {
                     if(! areTherePointsInTheDatabase()) {
                         addFirstPointsToSQL(pointsToAdd)//27
-                        pointsNumberTextView.text = getPointsValueFromDb().toString()
+                        setProgressBarAndPointsNumber(getPointsValueFromDb())
                         pointsToAdd = 0
                     }else{
                         addSecondaryPointsToDb(pointsToAdd)//24
-                        pointsNumberTextView.text = getPointsValueFromDb().toString()
+                        setProgressBarAndPointsNumber(getPointsValueFromDb())
+                        if (getPointsValueFromDb() == 50){
+                            Toast.makeText(this, "The maximum allowed number of points is 50", Toast.LENGTH_SHORT).show()
+                        }
                         pointsToAdd = 0
                     }//21
 
@@ -119,27 +125,40 @@ class MainActivity : AppCompatActivity() {
     }//23
 
     private fun show() {
-        val d = Dialog(this)
-        d.setTitle("NumberPicker")
-        d.setContentView(R.layout.dialog)
-        val b1: Button = d.findViewById(R.id.setButton) as Button
-        val b2: Button = d.findViewById(R.id.cancelButton) as Button
-        val np = d.findViewById(R.id.numberPicker1) as NumberPicker
-        np.maxValue = 20
-        np.minValue = 0
-        np.wrapSelectorWheel = false
+    val d = Dialog(this)
+    d.setTitle("NumberPicker")
+    d.setContentView(R.layout.dialog)
+    val b1: Button = d.findViewById(R.id.setButton) as Button
+    val b2: Button = d.findViewById(R.id.cancelButton) as Button
+    val np = d.findViewById(R.id.numberPicker1) as NumberPicker
+    np.maxValue = 20
+    np.minValue = 1
+    np.wrapSelectorWheel = false
 
-        b1.setOnClickListener{
-            pointsToAdd = np.value
-            d.dismiss()
-            doneWithShowingSpinner = true
-            Toast.makeText(this, "The number of points is $pointsToAdd", Toast.LENGTH_SHORT).show()
-            scanCode()//6 but up top
+    b1.setOnClickListener{
+        pointsToAdd = np.value
+        d.dismiss()
+        doneWithShowingSpinner = true
+        Toast.makeText(this, "Scan the Los Amigos barcode to add points", Toast.LENGTH_SHORT).show()
+        scanCode()//6 but up top
+    }
+    b2.setOnClickListener {
+        d.dismiss()
+    }
+    d.show()
+}//26
+
+    private fun setProgressBarAndPointsNumber(numberOfPoints: Int) {
+        progressBar.max = 500
+
+        if(numberOfPoints == 0)
+        {
+            pointsNumberTextView.text = '0'.toString()
+            ObjectAnimator.ofInt(progressBar, "progress", 0).setDuration(2000).start()
+        }else{
+            pointsNumberTextView.text = numberOfPoints.toString()
+            ObjectAnimator.ofInt(progressBar, "progress", numberOfPoints*10).setDuration(2000).start()
         }
-        b2.setOnClickListener {
-            d.dismiss()
-        }
-        d.show()
-    }//26
+    }
 
 }

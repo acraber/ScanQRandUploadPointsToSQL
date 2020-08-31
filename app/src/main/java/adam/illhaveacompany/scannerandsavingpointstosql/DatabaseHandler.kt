@@ -1,5 +1,6 @@
 package adam.illhaveacompany.scannerandsavingpointstosql
 
+import android.app.PendingIntent.getActivity
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -8,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Picture
+import android.widget.Toast
 
 class DatabaseHandler (context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION){
@@ -113,7 +115,11 @@ class DatabaseHandler (context: Context) :
         val pointsValueList = getPointsValues()
         val lastPointsValueRow = pointsValueList[pointsValueList.size - 1]
         val lastPointsValue = lastPointsValueRow.numberOfPoints
-        val newPointsValue = lastPointsValue + pointsToAdd
+        var newPointsValue = lastPointsValue + pointsToAdd
+
+        if(newPointsValue >= 50){
+            newPointsValue = 50
+        }//28
 
         val db = this.writableDatabase
 
@@ -126,4 +132,5 @@ class DatabaseHandler (context: Context) :
 
         return success
     }//22
+
 }
